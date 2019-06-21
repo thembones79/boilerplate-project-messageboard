@@ -27,19 +27,7 @@ var threadSchema = mongoose.Schema({
   }
 });
 
-//var Issue = (module.exports = mongoose.model("Issue", issueSchema, "pupa"));
-/*
- text, created_on(date&time), bumped_on(date&time, starts same as created_on), reported(boolean), delete_password, & replies(array).
-*/
-
-
 module.exports = {
-  methodE: function(req, res) {
-    res.send("anal");
-  },
-  methodF: function(req, res) {
-    res.send("anal");
-  },
   getThreads: function(req, res) {
     var board = req.params.board;
     var Thread = (module.exports = mongoose.model(
@@ -56,9 +44,7 @@ module.exports = {
       res.json(data);
     });
   },
-  methodG: function(req, res) {
-    res.send("oral");
-  },
+
   addThread: function(req, res) {
     var board = req.params.board;
     var thread = {
@@ -81,55 +67,59 @@ module.exports = {
       }
       res.redirect("/b/" + board + "/");
     });
+  },
+  reportThread: function(req, res) {
+    var board = req.params.board;
+    var id = req.body.report_id;
+    var Thread = (module.exports = mongoose.model(
+      "Thread",
+      threadSchema,
+      board
+    ));
+    Thread.findOneAndUpdate(
+      { _id: id },
+      { reported: true },
+      { new: true },
+      function(err, data) {
+        if (err) {
+          res.send(err.message);
+          console.log(err);
+        }
+        res.send("success - thread has been reported");
+      }
+    );
   }
 };
 
 /*
 
-addThread: function(req,res){
-var board = req.params.board;
-var thread = {
-      text: req.body.text,
-      created_on: new Date(),
-      bumped_on: new Date(),
-      reported: false,
-      delete_password: req.body.delete_password,
-      replies: []
-    };
-  var Thread = (module.exports = mongoose.model("Thread", threadSchema, board));
-    Thread.create(thread, function(err, data) {
-        if (err) {
-          res.send(err.message);
-          console.log(err);
-        }
-        res.redirect('/b/'+board+'/');
-      });
-}
-
- 
-  this.newThread = function(req, res) {
+  //reported_id name
+  this.reportThread = function(req, res) {
     var board = req.params.board;
-    var thread = {
-      text: req.body.text,
-      created_on: new Date(),
-      bumped_on: new Date(),
-      reported: false,
-      delete_password: req.body.delete_password,
-      replies: []
-    };
     mongo.connect(url,function(err,db) {
       var collection = db.collection(board);
-      collection.insert(thread, function(){
-        res.redirect('/b/'+board+'/');
-      });
+      collection.findAndModify(
+        {_id: new ObjectId(req.body.report_id)},
+        [],
+        {$set: {reported: true}},
+        function(err, doc) {});
     });
+    res.send('reported');
   };
-  
 
 
-*/
 
-/*
+
+
+
+
+
+
+
+
+
+
+
 this.threadList = function(req, res) {
     var board = req.params.board;
     mongoose.connect("url",function(err,db) {
@@ -155,6 +145,28 @@ this.threadList = function(req, res) {
       });
     });
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
 
 /*

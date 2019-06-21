@@ -13,26 +13,20 @@ var mongoose = require("mongoose");
 
 // Connect to mongoose
 mongoose.connect(process.env.DB, {
-  useNewUrlParser: true
+  useNewUrlParser: true,
+  useFindAndModify: false
 });
 mongoose.set("useCreateIndex", true);
 var db = mongoose.connection;
 
-var {
-  methodC,
-  methodD,
-  methodA,
-  methodE,
-  methodF,
-  addThread,
-  getThreads
-} = require("../models/thread.js");
+var { addThread, getThreads, reportThread } = require("../models/thread.js");
 
 module.exports = function(app) {
   app
     .route("/api/threads/:board")
     .get(getThreads)
-    .post(addThread);
+    .post(addThread)
+    .put(reportThread);
 
   app.route("/api/replies/:board");
 };
