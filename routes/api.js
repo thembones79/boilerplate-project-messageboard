@@ -19,14 +19,25 @@ mongoose.connect(process.env.DB, {
 mongoose.set("useCreateIndex", true);
 var db = mongoose.connection;
 
-var { addThread, getThreads, reportThread } = require("../models/thread.js");
+var {
+  addThread,
+  addReply,
+  getThreads,
+  getReplies,
+  reportThread,
+  deleteThread
+} = require("../models/thread.js");
 
 module.exports = function(app) {
   app
     .route("/api/threads/:board")
     .get(getThreads)
     .post(addThread)
-    .put(reportThread);
+    .put(reportThread)
+    .delete(deleteThread);
 
-  app.route("/api/replies/:board");
+  app
+    .route("/api/replies/:board")
+    .get(getReplies)
+    .post(addReply);
 };
