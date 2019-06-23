@@ -107,7 +107,7 @@ module.exports = {
   },
 
   /*
-  
+
  this.replyList = function(req, res) {
     var board = req.params.board;
     mongo.connect(url,function(err,db) {
@@ -124,8 +124,8 @@ module.exports = {
       });
     });
   };
-  
-  
+
+
 */
 
   addThread: function(req, res) {
@@ -208,10 +208,68 @@ module.exports = {
           res.send(err.message);
           console.log(err);
         }
+        console.log({ reportedData2: data });
         res.send("success - thread has been reported");
       }
     );
   },
+
+  reportReply: function(req, res) {
+    var board = req.params.board;
+    var id = req.body.thread_id;
+    var reply_id = req.body.reply_id;
+    var Thread = (module.exports = mongoose.model(
+      "Thread",
+      threadSchema,
+      board
+    ));
+    Thread.findById(id, function(err, data) {
+      if (err) {
+        console.log(err);
+        res.send(err.message);
+      }
+      data.replies.forEach(function(reply) {
+        console.log({ bodyId: reply_id });
+        console.log({ mongoId: reply._id });
+        console.log({ rep_rep: reply.reported });
+        if (reply._id == reply_id) {
+          reply.reported = true;
+        }
+      });
+      data.save(function(err, data) {
+        if (err) {
+          res.send(err.message);
+          console.log(err);
+        }
+        console.log({ data3: data });
+        console.log({ rep3: data.replies });
+        res.send("success - reply has been reported");
+      });
+
+      console.log({ reportedData: data });
+    });
+  },
+
+  /*
+   this.reportReply = function(req, res) {
+    var board = req.params.board;
+    mongo.connect(url,function(err,db) {
+      var collection = db.collection(board);
+      collection.findAndModify(
+        {
+          _id: new ObjectId(req.body.thread_id),
+          "replies._id": new ObjectId(req.body.reply_id)
+        },
+        [],
+        { $set: { "replies.$.reported": true } },
+        function(err, doc) {
+        });
+    });
+    res.send('reported');
+  };
+
+
+  */
 
   deleteThread: function(req, res) {
     var board = req.params.board;
@@ -242,11 +300,71 @@ module.exports = {
         });
       }
     });
+  },
+  deleteReply: function(req, res) {
+    var board = req.params.board;
+    var id = req.body.thread_id;
+    var reply_id = req.body.reply_id;
+    var delete_password = req.body.delete_password;
+    var Thread = (module.exports = mongoose.model(
+      "Thread",
+      threadSchema,
+      board
+    ));
+    Thread.findById(id, function(err, data) {
+      if (err) {
+        console.log(err);
+        res.send(err.message);
+      }
+      data.replies.forEach(function(reply) {
+        console.log({ bodyId: reply_id });
+        console.log({ mongoId: reply._id });
+        console.log({ rep_rep: reply.reported });
+        if (reply._id == reply_id) {
+          if (reply.delete_password == delete_password) {
+            reply.text = "[deleted]";
+          } else {
+            res.send("incorrect password");
+          }
+        }
+      });
+      data.save(function(err, data) {
+        if (err) {
+          res.send(err.message);
+          console.log(err);
+        }
+        console.log({ data3: data });
+        console.log({ rep3: data.replies });
+        res.send("success");
+      });
+
+      console.log({ reportedData: data });
+    });
   }
 };
 
 /*
- 
+
+  this.deleteReply = function(req, res) {
+    var board = req.params.board;
+    mongo.connect(url,function(err,db) {
+      var collection = db.collection(board);
+      collection.findAndModify(
+        {
+          _id: new ObjectId(req.body.thread_id),
+          replies: { $elemMatch: { _id: new ObjectId(req.body.reply_id), delete_password: req.body.delete_password } },
+        },
+        [],
+        { $set: { "replies.$.text": "[deleted]" } },
+        function(err, doc) {
+          if (doc.value === null) {
+            res.send('incorrect password');
+          } else {
+            res.send('success');
+          }
+        });
+    });
+  };
 */
 
 /*

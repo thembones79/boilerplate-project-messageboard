@@ -25,7 +25,9 @@ var {
   getThreads,
   getReplies,
   reportThread,
-  deleteThread
+  reportReply,
+  deleteThread,
+  deleteReply
 } = require("../models/thread.js");
 
 module.exports = function(app) {
@@ -39,5 +41,7 @@ module.exports = function(app) {
   app
     .route("/api/replies/:board")
     .get(getReplies)
-    .post(addReply);
+    .post(addReply)
+    .put(reportReply)
+    .delete(deleteReply);
 };
