@@ -223,11 +223,12 @@ module.exports = {
       threadSchema,
       board
     ));
-    Thread.findById(id, function(err, data) {
+    Thread.findById(id, async function(err, data) {
       if (err) {
         console.log(err);
         res.send(err.message);
       }
+
       data.replies.forEach(function(reply) {
         console.log({ bodyId: reply_id });
         console.log({ mongoId: reply._id });
@@ -236,7 +237,9 @@ module.exports = {
           reply.reported = true;
         }
       });
-      data.save(function(err, data) {
+
+      data.markModified("replies");
+      await data.save(function(err, data) {
         if (err) {
           res.send(err.message);
           console.log(err);
@@ -245,6 +248,19 @@ module.exports = {
         console.log({ rep3: data.replies });
         res.send("success - reply has been reported");
       });
+
+      /*
+          Thread.findOneAndUpdate.and({_id:id, "replies._id": reply_id}, { $set: { "replies.$.reported": true } }, { new: true },function(err, data) {
+      if (err) {
+        res.send(err.message);
+        console.log(err);
+      }
+      console.log({reportedData2: data})
+      res.send("success - reply has been reported");
+    });
+
+
+      */
 
       console.log({ reportedData: data });
     });
@@ -321,13 +337,18 @@ module.exports = {
         console.log({ mongoId: reply._id });
         console.log({ rep_rep: reply.reported });
         if (reply._id == reply_id) {
+          console.log({ passBody: delete_password });
+          console.log({ passMongo: reply.delete_password });
           if (reply.delete_password == delete_password) {
+            console.log({ text1: reply });
             reply.text = "[deleted]";
+            console.log({ text1: reply });
           } else {
             res.send("incorrect password");
           }
         }
       });
+      data.markModified("replies");
       data.save(function(err, data) {
         if (err) {
           res.send(err.message);
