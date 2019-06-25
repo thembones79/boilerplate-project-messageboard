@@ -100,33 +100,10 @@ module.exports = {
           res.send(err.message);
           console.log(err);
         }
-        console.log({ d1: data });
-        console.log({ d2: data[0] });
+
         res.json(data[0]);
       });
   },
-
-  /*
-
- this.replyList = function(req, res) {
-    var board = req.params.board;
-    mongo.connect(url,function(err,db) {
-      var collection = db.collection(board);
-      collection.find({_id: new ObjectId(req.query.thread_id)},
-      {
-        reported: 0,
-        delete_password: 0,
-        "replies.delete_password": 0,
-        "replies.reported": 0
-      })
-      .toArray(function(err,doc){
-        res.json(doc[0]);
-      });
-    });
-  };
-
-
-*/
 
   addThread: function(req, res) {
     var board = req.params.board;
@@ -173,19 +150,16 @@ module.exports = {
         res.send(err.message);
         console.log(err);
       }
-      console.log({ data1: data });
-      console.log({ rep1: data.replies });
+
       data.bumped_on = new Date();
       data.replies.push(reply);
-      console.log({ data2: data });
-      console.log({ rep2: data.replies });
+
       data.save(function(err, data) {
         if (err) {
           res.send(err.message);
           console.log(err);
         }
-        console.log({ data3: data });
-        console.log({ rep3: data.replies });
+
         res.redirect("/b/" + board + "/" + req.body.thread_id);
       });
     });
@@ -208,7 +182,7 @@ module.exports = {
           res.send(err.message);
           console.log(err);
         }
-        console.log({ reportedData2: data });
+
         res.send("success - thread has been reported");
       }
     );
@@ -230,9 +204,6 @@ module.exports = {
       }
 
       data.replies.forEach(function(reply) {
-        console.log({ bodyId: reply_id });
-        console.log({ mongoId: reply._id });
-        console.log({ rep_rep: reply.reported });
         if (reply._id == reply_id) {
           reply.reported = true;
         }
@@ -244,48 +215,11 @@ module.exports = {
           res.send(err.message);
           console.log(err);
         }
-        console.log({ data3: data });
-        console.log({ rep3: data.replies });
+
         res.send("success - reply has been reported");
       });
-
-      /*
-          Thread.findOneAndUpdate.and({_id:id, "replies._id": reply_id}, { $set: { "replies.$.reported": true } }, { new: true },function(err, data) {
-      if (err) {
-        res.send(err.message);
-        console.log(err);
-      }
-      console.log({reportedData2: data})
-      res.send("success - reply has been reported");
-    });
-
-
-      */
-
-      console.log({ reportedData: data });
     });
   },
-
-  /*
-   this.reportReply = function(req, res) {
-    var board = req.params.board;
-    mongo.connect(url,function(err,db) {
-      var collection = db.collection(board);
-      collection.findAndModify(
-        {
-          _id: new ObjectId(req.body.thread_id),
-          "replies._id": new ObjectId(req.body.reply_id)
-        },
-        [],
-        { $set: { "replies.$.reported": true } },
-        function(err, doc) {
-        });
-    });
-    res.send('reported');
-  };
-
-
-  */
 
   deleteThread: function(req, res) {
     var board = req.params.board;
@@ -302,8 +236,7 @@ module.exports = {
         res.send(err.message);
         console.log(err);
       }
-      console.log({ data1: data });
-      console.log({ rep1: data.replies });
+
       if (data.delete_password !== delete_password) {
         res.send("incorrect password");
       } else {
@@ -333,16 +266,9 @@ module.exports = {
         res.send(err.message);
       }
       data.replies.forEach(function(reply) {
-        console.log({ bodyId: reply_id });
-        console.log({ mongoId: reply._id });
-        console.log({ rep_rep: reply.reported });
         if (reply._id == reply_id) {
-          console.log({ passBody: delete_password });
-          console.log({ passMongo: reply.delete_password });
           if (reply.delete_password == delete_password) {
-            console.log({ text1: reply });
             reply.text = "[deleted]";
-            console.log({ text1: reply });
           } else {
             res.send("incorrect password");
           }
@@ -354,60 +280,9 @@ module.exports = {
           res.send(err.message);
           console.log(err);
         }
-        console.log({ data3: data });
-        console.log({ rep3: data.replies });
+
         res.send("success");
       });
-
-      console.log({ reportedData: data });
     });
   }
 };
-
-/*
-
-  this.deleteReply = function(req, res) {
-    var board = req.params.board;
-    mongo.connect(url,function(err,db) {
-      var collection = db.collection(board);
-      collection.findAndModify(
-        {
-          _id: new ObjectId(req.body.thread_id),
-          replies: { $elemMatch: { _id: new ObjectId(req.body.reply_id), delete_password: req.body.delete_password } },
-        },
-        [],
-        { $set: { "replies.$.text": "[deleted]" } },
-        function(err, doc) {
-          if (doc.value === null) {
-            res.send('incorrect password');
-          } else {
-            res.send('success');
-          }
-        });
-    });
-  };
-*/
-
-/*
-// Get Issues
-module.exports.getIssuesByQueryObject = function(queryObject, callback) {
-  Thread.find(queryObject, callback);
-};
-
-//Add Issue
-module.exports.addIssue = function(issue, callback) {
-  Issue.create(issue, callback);
-};
-
-//Update Issue
-module.exports.updateIssue = function(id, issue, options, callback) {
-  var query = { _id: id };
-  Issue.findOneAndUpdate(query, issue, options, callback);
-};
-
-//Delete Issue
-module.exports.deleteIssue = function(id, callback) {
-  var query = { _id: id };
-  Issue.deleteOne(query, callback);
-};
-*/
